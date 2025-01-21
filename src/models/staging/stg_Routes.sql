@@ -1,6 +1,4 @@
-/*
-To reference this table onwards: {{ ref('stg_routes') }}
-*/
+
 
 {{
     config(

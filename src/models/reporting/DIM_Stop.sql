@@ -1,7 +1,4 @@
 
-/* 
-To reference this table onwards: {{ref('DIM_Stop')}}
-*/
 
 {{
     config(
