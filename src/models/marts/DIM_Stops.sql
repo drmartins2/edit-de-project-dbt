@@ -1,42 +1,61 @@
-/* 
-To reference this table onwards: {{ref('DIM_Stops')}}
-*/
-
 {{
     config(
-        materialized = "table",
+        materialized = "table"
     )
 }}
 
-with dim_stops as (
-    select 
-        s.stop_id           AS stop_code,
-        s.stop_name,
-        s.stop_short_name,
-        s.stop_latitude,
-        s.stop_longitude,
-        s.region_id,
-        s.region_name,
-        s.district_id,
-        s.district_name,
-        s.municipality_id,
-        s.municipality_name,
-        s.locality,
-        s.operational_status,
-        s.near_school,
-        s.near_airport,
-        s.near_subway,
-        s.near_train,
+WITH stops AS (
+    SELECT 
+        stop_id,
+        stop_name,
+        stop_short_name,
+        stop_latitude,
+        stop_longitude,
+        region_id,
+        region_name,
+        district_id,
+        district_name,
+        municipality_id,
+        municipality_name,
+        locality,
+        operational_status,
+        near_school,
+        near_airport,
+        near_subway,
+        near_train,
+        current_time
+    FROM {{ ref('stg_Stops') }}
+),
+
+surrogate_keys AS (
+    SELECT
+        {{ dbt_utils.generate_surrogate_key(['stop_id', 'current_time']) }} AS pk_stop,  -- Gerando a chave substituta
+        stop_id,
+        stop_name,
+        stop_short_name,
+        stop_latitude,
+        stop_longitude,
+        region_id,
+        region_name,
+        district_id,
+        district_name,
+        municipality_id,
+        municipality_name,
+        locality,
+        operational_status,
+        near_school,
+        near_airport,
+        near_subway,
+        near_train,
+        current_time AS current_time,
         1 AS is_valid,
         CURRENT_TIMESTAMP() AS inserted_at,
         SESSION_USER()      AS inserted_by,
         CURRENT_TIMESTAMP() AS updated_at,
         SESSION_USER()      AS updated_by,
         GENERATE_UUID()     AS uuid
-    from {{ref('stg_Stops')}} s 
+    FROM stops
 )
 
-select 
-    {{ dbt_utils.generate_surrogate_key(['stop_code']) }} AS pk_stop_id,
-    st.*
-from dim_stops st
+SELECT *
+FROM surrogate_keys

@@ -24,12 +24,15 @@ vars:
 models:
   edit_de_project:
     staging:
+      +schema: staging
       +materialized: view
       +on_schema_change: "sync_all_columns"
     marts:
+      +schema: marts
       +materialized: table
       +on_schema_change: "sync_all_columns"
     reporting:
+      +schema: reporting
       +materialized: incremental
       +on_schema_change: "sync_all_columns"
 
