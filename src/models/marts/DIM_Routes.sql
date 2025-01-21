@@ -33,7 +33,7 @@ WITH base_routes AS (
             WHEN route_type = '11' THEN 'Trolleybus'
             ELSE 'Monorail'
         END AS route_type
-    FROM {{ ref('stg_routes') }}
+    FROM {{ ref('stg_Routes') }}
 ),
 
 dim_route AS (
