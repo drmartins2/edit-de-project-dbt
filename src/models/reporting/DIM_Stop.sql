@@ -5,7 +5,8 @@ To reference this table onwards: {{ref('DIM_Stop')}}
 
 {{
     config(
-        materialized = "table",
+        materialized = "incremental",
+        unique_key = "stop_code"
     )
 }}
 

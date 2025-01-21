@@ -25,8 +25,13 @@ models:
   edit_de_project:
     staging:
       +materialized: view
+      +on_schema_change: "sync_all_columns"
     marts:
       +materialized: table
+      +on_schema_change: "sync_all_columns"
+    reporting:
+      +materialized: incremental
+      +on_schema_change: "sync_all_columns"
 
 saved-queries:
   +cache:
