@@ -1,5 +1,5 @@
 edit_de_project:
-  target: dev #for production add argm --target prod
+  target: dev #for production add argm --target prd
   outputs:
     staging:
       dataset: data_eng_project_group1

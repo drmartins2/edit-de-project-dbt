@@ -2,7 +2,7 @@ version: 2
 sources:
   - name: raw_data
     database: data-eng-dev-437916
-    schema: data_eng_project_group1_dev
+    schema: data_eng_project_group1
     tables:
       - name: staging_agency
       - name: staging_archives
