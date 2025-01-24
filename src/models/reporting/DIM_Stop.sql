@@ -3,7 +3,7 @@
 {{
     config(
         materialized = "incremental",
-        unique_key = "stop_code"
+        unique_key = "stop_id"
     )
 }}
 

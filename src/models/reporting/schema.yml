@@ -44,10 +44,7 @@ models:
         description: Timestamp for when the record was last updated.
       - name: updated_by
         description: User who last updated the record.
-      - name: uuid
-        description: Unique identifier for the record.
-        tests:
-          - unique
+
 
   - name: DIM_Date
     description: Dimension table about the date.
