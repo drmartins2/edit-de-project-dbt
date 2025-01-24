@@ -10,7 +10,7 @@ analysis-paths: ["src/analyses"]
 test-paths: ["src/tests"]
 seed-paths: ["src/seeds"]
 macro-paths: ["src/macros"]
-snapshot-paths: ["src/snapshots"]
+snapshot-paths: ["snapshots"]
 
 target-path: "target"
 clean-targets:

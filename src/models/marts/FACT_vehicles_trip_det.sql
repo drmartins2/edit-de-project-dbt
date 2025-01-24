@@ -1,40 +1,45 @@
 {{ 
     config(
-    materialized = "table"
-) 
+        materialized = "table" 
+    )
 }}
 
-WITH trip_status AS (
+WITH trip_service AS (
+    Select * from (
+        SELECT DISTINCT *, ROW_NUMBER() OVER (PARTITION BY stop_id, trip_id ORDER BY expected_arrival_time DESC) as row_
+    FROM {{ ref('stg_stop_times') }} ) where row_=1  
+),
+trip_status AS (
     SELECT DISTINCT
-        CONCAT(b.sk_stop, '_', b.sk_trip, b.sk_date, b.current_status) AS pk_trip_stop_id,
+        CONCAT(b.sk_stop, '_', b.sk_trip, '_', b.sk_hist_datetime) AS pk_trip_stop_id,
         b.sk_stop,
         b.sk_trip,
         b.sk_vehicle,
         b.sk_line,
-        t.sk_route,
-        DATE(b.sk_date) as sk_date,
-        b.sk_hist_datetime,
+        b.sk_route,
+        b.sk_date,
+        b.sk_hist_datetime AS atual_arrival_time,
+        ts.expected_arrival_time,
+        ts.expected_departure_time,
+        ts.stop_pickup_type,
+        ts.stop_drop_off_type,
+        ts.stop_sequence,
         b.current_status,
-        a.distance_traveled,
-        1 AS is_valid,
-        CURRENT_TIMESTAMP() AS inserted_at,
-        SESSION_USER()      AS inserted_by,
-        CURRENT_TIMESTAMP() AS updated_at,
-        SESSION_USER()      AS updated_by,
-        GENERATE_UUID()     AS uuid
-    FROM 
-        (SELECT DISTINCT * 
-        FROM {{ ref('stg_historical_stop_times') }}) b
-    LEFT JOIN (
-        SELECT trip_id, stop_id, AVG(CAST(distance_traveled AS FLOAT64)) AS distance_traveled
-        FROM {{ ref('stg_stop_times') }}
-        GROUP BY trip_id, stop_id
-    ) a
-    ON a.trip_id = b.sk_trip
-    AND CAST(a.stop_id AS STRING) = CAST(CONCAT('0', b.sk_stop) AS STRING)
-    LEFT JOIN {{ ref('stg_trips') }} t
-    ON b.sk_trip = t.trip_id
+        ts.distance_traveled,
+        CASE
+            WHEN EXTRACT(HOUR FROM b.sk_hist_datetime) <= CAST(LEFT(ts.expected_arrival_time, 2) AS INT64)
+                 AND EXTRACT(MINUTE FROM b.sk_hist_datetime) <= CAST(RIGHT(LEFT(ts.expected_arrival_time, 5), 2) AS INT64)
+            THEN "ON TIME"
+            ELSE "LATE"
+        END AS arrival_on_time, 
+        current_timestamp AS updated_at
+    FROM (
+        SELECT DISTINCT *
+        FROM {{ ref('stg_historical_stop_times') }} WHERE current_status = 'STOPPED_AT' 
+    ) b
+    LEFT JOIN trip_service ts
+        ON CAST(ts.stop_id AS INT) = b.sk_stop
+        AND ts.trip_id = b.sk_trip
 )
-
 SELECT *
 FROM trip_status
